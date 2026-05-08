@@ -167,6 +167,6 @@ Check that `MODEL_DEPLOYMENT` in `.env` exactly matches your deployed model name
 
 ## Support
 
-- Contact: [contact@samabrains.com](mailto:contact@samabrains.com)
+- Contact: [info@samabrains.com](mailto:contact@samabrains.com)
 - Website: [samabrains.com](https://samabrains.com)
 - Docs: See `README.md` and `ARCHITECTURE.md`
