@@ -107,4 +107,4 @@ By contributing, you agree that your contributions are licensed under the MIT Li
 
 ## Questions
 
-Contact [contact@samabrains.com](mailto:contact@samabrains.com).
+Contact [info@samabrains.com](mailto:contact@samabrains.com).
