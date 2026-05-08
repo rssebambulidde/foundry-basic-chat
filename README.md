@@ -130,8 +130,8 @@ Next Turn Uses previous_response_id
 
 | Detail | Value |
 | --- | --- |
-| Repository | `rssebambulidde/foundry-streaming-responses-chat-with-azure-openai` |
-| Remote URL | `https://github.com/rssebambulidde/foundry-streaming-responses-chat-with-azure-openai.git` |
+| Repository | `rssebambulidde/foundry-basic-chat` |
+| Remote URL | `https://github.com/rssebambulidde/foundry-basic-chat.git` |
 | Current branch | `master` |
 | Project type | Python command-line AI chat demo |
 | Runtime | Python 3.13+ |
