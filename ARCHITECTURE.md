@@ -1,1 +1,194 @@
-# Architecture Overview\n\n## Synchronous Chat Application (chat-app.py)\n\n```\nUser Input\n    ↓\nAzure OpenAI Client\n    ↓\nResponses API Request\n    ↓\nAzure OpenAI Model (GPT-4.1)\n    ↓\nStreaming Response Events\n    ├─ response.output_text.delta → Display chunks\n    └─ response.completed → Save response ID\n    ↓\nUser Display + Context Storage\n```\n\n**Key Flow:**\n1. User enters prompt\n2. Client sends synchronous request\n3. Model processes and streams response\n4. Each chunk displays immediately\n5. Response ID saved for context linking\n\n**Advantages:**\n- Simpler control flow\n- Easier to debug\n- Straightforward error handling\n\n**Limitations:**\n- Blocks execution while waiting\n- Can't handle concurrent requests\n- Not suitable for high-concurrency scenarios\n\n---\n\n## Asynchronous Chat Application (chat-async.py)\n\n```\nUser Input\n    ↓\nAsync Event Loop\n    ↓\nAsyncOpenAI Client\n    ↓\nAsync Responses API Request\n    ↓\nAzure OpenAI Model (GPT-4.1)\n    ↓\nAwaitable Response\n    ├─ Non-blocking wait\n    └─ Event loop can handle other tasks\n    ↓\nResponse Processing + Context Storage\n```\n\n**Key Flow:**\n1. User enters prompt\n2. Event loop executes async request\n3. `await` pauses execution without blocking\n4. Other tasks can execute simultaneously\n5. Response ID saved when complete\n\n**Advantages:**\n- Non-blocking architecture\n- Handles concurrent operations\n- Better resource utilization\n- Production-ready for APIs\n\n**Use Cases:**\n- Web APIs (FastAPI, Flask-Async)\n- High-concurrency services\n- Event-driven applications\n- Server handling multiple clients\n\n---\n\n## Responses API vs ChatCompletions\n\n| Feature | ChatCompletions | Responses API |\n|---------|-----------------|---------------|\n| Message Format | Array of messages | Direct instructions |\n| Conversation Tracking | Manual management | Built-in (response IDs) |\n| Streaming | Yes | Yes |\n| Tool Support | Via function_calling | Native (in tools-augmented) |\n| Syntax | Verbose | Simple |\n| Learning Curve | Steeper | Gentler |\n\n---\n\n## Conversation Context Management\n\n**How Response IDs Work:**\n```\nExchange 1:\n  User: \"Tell me about ELIZA\"\n  Response ID: abc123\n  \nExchange 2:\n  User: \"How does it compare to modern LLMs?\"\n  previous_response_id: abc123 ← Links back\n  \n  Model receives:\n  1. User's current question\n  2. Previous response context (from ID)\n  3. Can understand \"it\" refers to ELIZA\n```\n\n**Benefits:**\n- Automatic context management\n- No need to store message history\n- Efficient token usage\n- Clean API design\n\n---\n\n## Technology Stack\n\n- **Language:** Python 3.13+\n- **SDK:** OpenAI Python SDK v2.33+\n- **Authentication:** Azure Identity (token-based)\n- **Model:** Azure OpenAI GPT-4.1\n- **Infrastructure:** Microsoft Foundry / Azure OpenAI Service\n- **Concurrency:** asyncio (Python standard library)\n\n---\n\n## Error Handling & Resilience\n\n**Implemented:**\n- Credential authentication with DefaultAzureCredential\n- Graceful error reporting\n- Resource cleanup in finally blocks\n- Input validation\n\n**For Production:**\n- Retry logic with exponential backoff\n- Rate limiting handling\n- Comprehensive logging\n- Health checks\n- Circuit breakers\n\n---\n\n## Deployment Considerations\n\n**Synchronous (chat-app.py):**\n- Simple standalone scripts\n- Scheduled jobs\n- Sequential processing\n- Learning/demo purposes\n\n**Asynchronous (chat-async.py):**\n- FastAPI/Starlette applications\n- gRPC services\n- WebSocket servers\n- High-throughput APIs\n- Cloud-native deployments\n\n---\n\n## Performance Characteristics\n\n**Streaming Benefits:**\n- Time-to-first-token: Minimal latency\n- User perception: Responsive interface\n- Memory efficiency: Process chunks vs entire response\n- Network optimization: Progressive delivery\n\n**Async Benefits:**\n- Throughput: Handle 100s of concurrent requests\n- Latency: Non-blocking during I/O\n- Resource usage: Minimal thread overhead\n- Scalability: Efficient resource pooling\n
+
+# Architecture Overview
+
+---
+
+## Synchronous Chat Application (`chat-app.py`)
+
+```text
+User Input
+    ↓
+Azure OpenAI Client
+    ↓
+Responses API Request
+    ↓
+Azure OpenAI Model (GPT-4.1)
+    ↓
+Streaming Response Events
+    ├─ response.output_text.delta → Display chunks
+    └─ response.completed → Save response ID
+    ↓
+User Display + Context Storage
+```
+
+**Key Flow:**
+
+1. User enters prompt
+2. Client sends synchronous request
+3. Model processes and streams response
+4. Each chunk displays immediately
+5. Response ID saved for context linking
+
+**Advantages:**
+
+- Simpler control flow
+- Easier to debug
+- Straightforward error handling
+
+**Limitations:**
+
+- Blocks execution while waiting
+- Can't handle concurrent requests
+- Not suitable for high-concurrency scenarios
+
+---
+
+## Asynchronous Chat Application (`chat-async.py`)
+
+```text
+User Input
+    ↓
+Async Event Loop
+    ↓
+AsyncOpenAI Client
+    ↓
+Async Responses API Request
+    ↓
+Azure OpenAI Model (GPT-4.1)
+    ↓
+Awaitable Response
+    ├─ Non-blocking wait
+    └─ Event loop can handle other tasks
+    ↓
+Response Processing + Context Storage
+```
+
+**Key Flow:**
+
+1. User enters prompt
+2. Event loop executes async request
+3. `await` pauses execution without blocking
+4. Other tasks can execute simultaneously
+5. Response ID saved when complete
+
+**Advantages:**
+
+- Non-blocking architecture
+- Handles concurrent operations
+- Better resource utilization
+- Production-ready for APIs
+
+**Use Cases:**
+
+- Web APIs (FastAPI, Flask-Async)
+- High-concurrency services
+- Event-driven applications
+- Server handling multiple clients
+
+---
+
+## Responses API vs ChatCompletions
+
+| Feature               | ChatCompletions      | Responses API                |
+|----------------------|---------------------|------------------------------|
+| Message Format       | Array of messages   | Direct instructions          |
+| Conversation Tracking| Manual management   | Built-in (response IDs)      |
+| Streaming            | Yes                | Yes                         |
+| Tool Support         | Via function_calling| Native (in tools-augmented)  |
+| Syntax               | Verbose            | Simple                      |
+| Learning Curve       | Steeper            | Gentler                     |
+
+---
+
+## Conversation Context Management
+
+**How Response IDs Work:**
+
+```text
+Exchange 1:
+  User: "Tell me about ELIZA"
+  Response ID: abc123
+
+Exchange 2:
+  User: "How does it compare to modern LLMs?"
+  previous_response_id: abc123 ← Links back
+
+  Model receives:
+  1. User's current question
+  2. Previous response context (from ID)
+  3. Can understand "it" refers to ELIZA
+```
+
+**Benefits:**
+
+- Automatic context management
+- No need to store message history
+- Efficient token usage
+- Clean API design
+
+---
+
+## Technology Stack
+
+- **Language:** Python 3.13+
+- **SDK:** OpenAI Python SDK v2.33+
+- **Authentication:** Azure Identity (token-based)
+- **Model:** Azure OpenAI GPT-4.1
+- **Infrastructure:** Microsoft Foundry / Azure OpenAI Service
+- **Concurrency:** asyncio (Python standard library)
+
+---
+
+## Error Handling & Resilience
+
+**Implemented:**
+
+- Credential authentication with DefaultAzureCredential
+- Graceful error reporting
+- Resource cleanup in finally blocks
+- Input validation
+
+**For Production:**
+
+- Retry logic with exponential backoff
+- Rate limiting handling
+- Comprehensive logging
+- Health checks
+- Circuit breakers
+
+---
+
+## Deployment Considerations
+
+**Synchronous (`chat-app.py`):**
+
+- Simple standalone scripts
+- Scheduled jobs
+- Sequential processing
+- Learning/demo purposes
+
+**Asynchronous (`chat-async.py`):**
+
+- FastAPI/Starlette applications
+- gRPC services
+- WebSocket servers
+- High-throughput APIs
+- Cloud-native deployments
+
+---
+
+## Performance Characteristics
+
+**Streaming Benefits:**
+
+- Time-to-first-token: Minimal latency
+- User perception: Responsive interface
+- Memory efficiency: Process chunks vs entire response
+- Network optimization: Progressive delivery
+
+**Async Benefits:**
+
+- Throughput: Handle 100s of concurrent requests
+- Latency: Non-blocking during I/O
+- Resource usage: Minimal thread overhead
+- Scalability: Efficient resource pooling

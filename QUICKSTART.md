@@ -1,1 +1,215 @@
-# Quick Start Guide\n\n## 5-Minute Setup\n\n### 1. Prerequisites\n```bash\n# Check Python version (3.13+ required)\npython --version\n\n# Verify Git\ngit --version\n```\n\n### 2. Clone & Environment\n```bash\n# Create virtual environment\npython -m venv venv\nvenv\\Scripts\\activate  # Windows\nsource venv/bin/activate  # macOS/Linux\n\n# Install dependencies\npip install -r requirements.txt\n```\n\n### 3. Configure Credentials\n```bash\n# Copy config template\ncopy .env.example .env\n\n# Edit .env and add your Azure OpenAI credentials:\n# AZURE_OPENAI_ENDPOINT=your_endpoint_url\n# MODEL_DEPLOYMENT=gpt-4.1\n```\n\n### 4. Run Application\n```bash\n# Synchronous version (simpler)\npython chat-app.py\n\n# Asynchronous version (production)\npython chat-async.py\n```\n\n### 5. Test It\n```\nEnter a prompt: Tell me about ELIZA\nAssistant: ELIZA is...\n\nEnter a prompt: How does it compare to modern LLMs?\nAssistant: Unlike ELIZA, modern LLMs...\n(Note: AI remembered ELIZA!)\n\nEnter a prompt: quit\n```\n\n---\n\n## Azure Setup\n\n### Login to Azure\n```bash\naz login\n```\n\n### Get Your Credentials\n1. Go to [Azure Portal](https://portal.azure.com)\n2. Search for \"Azure OpenAI Service\"\n3. Find your service instance\n4. Copy endpoint URL from \"Keys and Endpoints\"\n5. Copy model deployment name\n\n### Update .env\n```env\nAZURE_OPENAI_ENDPOINT=https://your-service.openai.azure.com/openai/v1\nMODEL_DEPLOYMENT=gpt-4.1\n```\n\n---\n\n## Architecture at a Glance\n\n### Synchronous (`chat-app.py`)\n- Sequential request/response\n- Simple control flow\n- Great for learning\n- Not suitable for concurrent requests\n\n### Asynchronous (`chat-async.py`)\n- Non-blocking with async/await\n- Handles 100s concurrent requests\n- Production-ready\n- More complex but efficient\n\n---\n\n## Key Features\n\n✅ **Responses API** - Modern, simple API  \n✅ **Streaming** - Real-time token display  \n✅ **Context Memory** - Conversation tracking via response IDs  \n✅ **Token Auth** - Secure, no hardcoded keys  \n✅ **Error Handling** - Graceful failure modes  \n\n---\n\n## Troubleshooting\n\n### \"Azure credentials not found\"\n```bash\naz login\n# Select your subscription when prompted\n```\n\n### \"ModuleNotFoundError\"\n```bash\n# Activate venv first\nvenv\\Scripts\\activate  # Windows\n\n# Reinstall dependencies\npip install -r requirements.txt\n```\n\n### \"Model not found\"\n```bash\n# Check MODEL_DEPLOYMENT in .env\n# Should exactly match your Azure deployment name\n# Case-sensitive!\n```\n\n### \"Connection timeout\"\n- Verify internet connection\n- Check AZURE_OPENAI_ENDPOINT is correct\n- Ensure not behind restrictive firewall\n\n---\n\n## Next Steps\n\n1. **Explore the code** - Every line is commented\n2. **Read ARCHITECTURE.md** - Deep dive into design\n3. **Experiment** - Try different prompts\n4. **Compare** - Run both sync and async versions\n5. **Deploy** - See how async version scales\n\n---\n\n## File Structure\n\n```\n.\n├── chat-app.py              # Synchronous implementation\n├── chat-async.py            # Asynchronous implementation\n├── requirements.txt         # Python dependencies\n├── .env.example            # Configuration template\n├── .gitignore              # Git ignore rules\n├── README.md               # Full documentation\n├── ARCHITECTURE.md         # Design details\n├── CONTRIBUTING.md         # Contribution guidelines\n├── LICENSE                 # MIT License\n└── .github/\n    ├── workflows/\n    │   └── lint.yml        # CI/CD pipeline\n    └── PULL_REQUEST_TEMPLATE.md\n```\n\n---\n\n## Documentation\n\n- **README.md** - Comprehensive guide\n- **ARCHITECTURE.md** - Technical deep dive\n- **Code comments** - Every function explained\n- **In-code docstrings** - Function documentation\n\n---\n\n## Support\n\n📧 **Contact:** [contact@samabrains.com](mailto:contact@samabrains.com)  \n🌐 **Website:** [samabrains.com](https://samabrains.com)  \n📚 **Docs:** See README.md and ARCHITECTURE.md  \n\n---\n\n**Ready to build AI applications? Let's go!** 🚀\n"
+
+# Quick Start Guide
+
+---
+
+## 1. Prerequisites
+
+```bash
+# Check Python version (3.13+ required)
+python --version
+
+# Verify Git
+git --version
+```
+
+---
+
+## 2. Clone & Environment Setup
+
+```bash
+# Clone the repository
+git clone <repository>
+cd <project>
+
+# Create virtual environment
+python -m venv venv
+venv\Scripts\activate  # Windows
+source venv/bin/activate  # macOS/Linux
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+---
+
+## 3. Configure Credentials
+
+```bash
+# Copy config template
+copy .env.example .env
+# or (on macOS/Linux)
+cp .env.example .env
+
+# Edit .env and add your Azure OpenAI credentials:
+# AZURE_OPENAI_ENDPOINT=your_endpoint_url
+# MODEL_DEPLOYMENT=gpt-4.1
+```
+
+---
+
+## 4. Run Application
+
+```bash
+# Synchronous version (simpler)
+python chat-app.py
+
+# Asynchronous version (production)
+python chat-async.py
+```
+
+---
+
+## 5. Test It
+
+```text
+Enter a prompt: Tell me about ELIZA
+Assistant: ELIZA is...
+
+Enter a prompt: How does it compare to modern LLMs?
+Assistant: Unlike ELIZA, modern LLMs...
+(Note: AI remembered ELIZA!)
+
+Enter a prompt: quit
+```
+
+---
+
+## Azure Setup
+
+### Login to Azure
+
+```bash
+az login
+```
+
+### Get Your Credentials
+
+1. Go to [Azure Portal](https://portal.azure.com)
+2. Search for "Azure OpenAI Service"
+3. Find your service instance
+4. Copy endpoint URL from "Keys and Endpoints"
+5. Copy model deployment name
+
+### Update .env
+
+```env
+AZURE_OPENAI_ENDPOINT=https://your-service.openai.azure.com/openai/v1
+MODEL_DEPLOYMENT=gpt-4.1
+```
+
+---
+
+## Architecture at a Glance
+
+### Synchronous (`chat-app.py`)
+
+- Sequential request/response
+- Simple control flow
+- Great for learning
+- Not suitable for concurrent requests
+
+### Asynchronous (`chat-async.py`)
+
+- Non-blocking with async/await
+- Handles 100s concurrent requests
+- Production-ready
+- More complex but efficient
+
+---
+
+## Key Features
+
+- ✅ **Responses API** - Modern, simple API
+- ✅ **Streaming** - Real-time token display
+- ✅ **Context Memory** - Conversation tracking via response IDs
+- ✅ **Token Auth** - Secure, no hardcoded keys
+- ✅ **Error Handling** - Graceful failure modes
+
+---
+
+## Troubleshooting
+
+### "Azure credentials not found"
+
+```bash
+az login
+# Select your subscription when prompted
+```
+
+### "ModuleNotFoundError"
+
+```bash
+# Activate venv first
+venv\Scripts\activate  # Windows
+
+# Reinstall dependencies
+pip install -r requirements.txt
+```
+
+### "Model not found"
+
+```bash
+# Check MODEL_DEPLOYMENT in .env
+# Should exactly match your Azure deployment name
+# Case-sensitive!
+```
+
+### "Connection timeout"
+
+- Verify internet connection
+- Check AZURE_OPENAI_ENDPOINT is correct
+- Ensure not behind restrictive firewall
+
+---
+
+## Next Steps
+
+1. **Explore the code** - Every line is commented
+2. **Read ARCHITECTURE.md** - Deep dive into design
+3. **Experiment** - Try different prompts
+4. **Compare** - Run both sync and async versions
+5. **Deploy** - See how async version scales
+
+---
+
+## File Structure
+
+```text
+.
+├── chat-app.py              # Synchronous implementation
+├── chat-async.py            # Asynchronous implementation
+├── requirements.txt         # Python dependencies
+├── .env.example            # Configuration template
+├── .gitignore              # Git ignore rules
+├── README.md               # Full documentation
+├── ARCHITECTURE.md         # Design details
+├── CONTRIBUTING.md         # Contribution guidelines
+├── LICENSE                 # MIT License
+└── .github/
+    ├── workflows/
+    │   └── lint.yml        # CI/CD pipeline
+    └── PULL_REQUEST_TEMPLATE.md
+```
+
+---
+
+## Documentation
+
+- **README.md** - Comprehensive guide
+- **ARCHITECTURE.md** - Technical deep dive
+- **Code comments** - Every function explained
+- **In-code docstrings** - Function documentation
+
+---
+
+## Support
+
+- 📧 **Contact:** [contact@samabrains.com](mailto:contact@samabrains.com)
+- 🌐 **Website:** [samabrains.com](https://samabrains.com)
+- 📚 **Docs:** See README.md and ARCHITECTURE.md
+
+---
+
+**Ready to build AI applications? Let's go!** 🚀
+"
