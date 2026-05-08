@@ -1,36 +1,38 @@
 import os
-from dotenv import load_dotenv
 
-# import namespaces
-from openai import OpenAI
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+from dotenv import load_dotenv
+from openai import OpenAI
 
 
+def get_required_env(name: str) -> str:
+    value = os.getenv(name)
+    if not value:
+        raise ValueError(f"Missing required environment variable: {name}")
+    return value
 
-def main(): 
+
+def main() -> None:
     # Clear the console
-    os.system('cls' if os.name == 'nt' else 'clear')
+    os.system("cls" if os.name == "nt" else "clear")
+    credential = None
 
     try:
-        # Get configuration settings 
+        # Get configuration settings
         load_dotenv()
-        azure_openai_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
-        model_deployment = os.getenv("MODEL_DEPLOYMENT")
+        azure_openai_endpoint = get_required_env("AZURE_OPENAI_ENDPOINT")
+        model_deployment = get_required_env("MODEL_DEPLOYMENT")
 
         # Initialize the OpenAI client
+        credential = DefaultAzureCredential()
         token_provider = get_bearer_token_provider(
-            DefaultAzureCredential(), "https://ai.azure.com/.default"
+            credential, "https://ai.azure.com/.default"
         )
-        
-        openai_client = OpenAI(
-            base_url=azure_openai_endpoint,
-            api_key=token_provider
-        )
+
+        openai_client = OpenAI(base_url=azure_openai_endpoint, api_key=token_provider)
 
         # Track responses
         last_response_id = None
-        
-
 
         # Loop until the user wants to quit
         while True:
@@ -47,18 +49,23 @@ def main():
                 instructions="You are a helpful AI assistant that answers questions and provides information.",
                 input=input_text,
                 previous_response_id=last_response_id,
-                stream=True
+                stream=True,
             )
+            print("Assistant: ", end="", flush=True)
             for event in stream:
                 if event.type == "response.output_text.delta":
-                    print(event.delta, end="")
+                    print(event.delta, end="", flush=True)
                 elif event.type == "response.completed":
                     last_response_id = event.response.id
             print()
-            
 
     except Exception as ex:
         print(ex)
 
-if __name__ == '__main__': 
+    finally:
+        if credential is not None:
+            credential.close()
+
+
+if __name__ == "__main__":
     main()

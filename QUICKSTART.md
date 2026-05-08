@@ -1,28 +1,25 @@
-
 # Quick Start Guide
-
----
 
 ## 1. Prerequisites
 
 ```bash
-# Check Python version (3.13+ required)
+# Check Python version
 python --version
 
 # Verify Git
 git --version
 ```
 
----
+This project is designed for Python 3.13 or later.
 
-## 2. Clone & Environment Setup
+## 2. Clone and Set Up the Environment
 
 ```bash
 # Clone the repository
 git clone <repository>
 cd <project>
 
-# Create virtual environment
+# Create a virtual environment
 python -m venv venv
 venv\Scripts\activate  # Windows
 source venv/bin/activate  # macOS/Linux
@@ -31,36 +28,44 @@ source venv/bin/activate  # macOS/Linux
 pip install -r requirements.txt
 ```
 
----
-
 ## 3. Configure Credentials
 
 ```bash
-# Copy config template
+# Copy the config template
 copy .env.example .env
-# or (on macOS/Linux)
-cp .env.example .env
 
-# Edit .env and add your Azure OpenAI credentials:
-# AZURE_OPENAI_ENDPOINT=your_endpoint_url
-# MODEL_DEPLOYMENT=gpt-4.1
+# macOS/Linux alternative
+cp .env.example .env
 ```
 
----
+Update `.env` with your Azure OpenAI values:
 
-## 4. Run Application
+```env
+AZURE_OPENAI_ENDPOINT=https://your-service.openai.azure.com/openai/v1
+MODEL_DEPLOYMENT=gpt-4.1
+```
+
+## 4. Sign In to Azure
 
 ```bash
-# Synchronous version (simpler)
+az login
+```
+
+Select the subscription that contains your Azure OpenAI resource.
+
+## 5. Run the Application
+
+```bash
+# Synchronous version
 python chat-app.py
 
-# Asynchronous version (production)
+# Asynchronous version
 python chat-async.py
 ```
 
----
+Type your prompts at the terminal. Type `quit` to exit.
 
-## 5. Test It
+## 6. Try a Multi-Turn Conversation
 
 ```text
 Enter a prompt: Tell me about ELIZA
@@ -68,110 +73,70 @@ Assistant: ELIZA is...
 
 Enter a prompt: How does it compare to modern LLMs?
 Assistant: Unlike ELIZA, modern LLMs...
-(Note: AI remembered ELIZA!)
 
 Enter a prompt: quit
 ```
 
----
+The second response can use context from the first exchange because the app passes `previous_response_id` between turns.
 
 ## Azure Setup
 
-### Login to Azure
+To find your Azure OpenAI values:
 
-```bash
-az login
-```
-
-### Get Your Credentials
-
-1. Go to [Azure Portal](https://portal.azure.com)
-2. Search for "Azure OpenAI Service"
-3. Find your service instance
-4. Copy endpoint URL from "Keys and Endpoints"
-5. Copy model deployment name
-
-### Update .env
-
-```env
-AZURE_OPENAI_ENDPOINT=https://your-service.openai.azure.com/openai/v1
-MODEL_DEPLOYMENT=gpt-4.1
-```
-
----
+1. Open the [Azure Portal](https://portal.azure.com).
+2. Search for your Azure OpenAI resource.
+3. Open the resource's keys and endpoint page.
+4. Copy the endpoint URL.
+5. Copy the model deployment name from Azure AI Foundry or Azure OpenAI Studio.
 
 ## Architecture at a Glance
 
-### Synchronous (`chat-app.py`)
+### Synchronous App (`chat-app.py`)
 
-- Sequential request/response
-- Simple control flow
-- Great for learning
-- Not suitable for concurrent requests
+- Uses a sequential request and response flow.
+- Streams response chunks as they arrive.
+- Is easiest to follow while learning.
 
-### Asynchronous (`chat-async.py`)
+### Asynchronous App (`chat-async.py`)
 
-- Non-blocking with async/await
-- Handles 100s concurrent requests
-- Production-ready
-- More complex but efficient
-
----
+- Uses `asyncio` and `AsyncOpenAI`.
+- Streams response chunks with `async for`.
+- Fits better into web services or other async Python applications.
 
 ## Key Features
 
-- ✅ **Responses API** - Modern, simple API
-- ✅ **Streaming** - Real-time token display
-- ✅ **Context Memory** - Conversation tracking via response IDs
-- ✅ **Token Auth** - Secure, no hardcoded keys
-- ✅ **Error Handling** - Graceful failure modes
-
----
+- Responses API
+- Streaming token output
+- Conversation context through response IDs
+- Token-based Azure authentication
+- Basic environment validation and error handling
 
 ## Troubleshooting
 
-### "Azure credentials not found"
+### Azure Credentials Not Found
 
 ```bash
 az login
-# Select your subscription when prompted
 ```
 
-### "ModuleNotFoundError"
+Make sure the selected subscription has access to the Azure OpenAI resource.
+
+### Missing Python Package
 
 ```bash
-# Activate venv first
 venv\Scripts\activate  # Windows
-
-# Reinstall dependencies
 pip install -r requirements.txt
 ```
 
-### "Model not found"
+### Model Not Found
 
-```bash
-# Check MODEL_DEPLOYMENT in .env
-# Should exactly match your Azure deployment name
-# Case-sensitive!
-```
+Check that `MODEL_DEPLOYMENT` in `.env` exactly matches your deployed model name. Deployment names are case-sensitive.
 
-### "Connection timeout"
+### Connection Timeout
 
-- Verify internet connection
-- Check AZURE_OPENAI_ENDPOINT is correct
-- Ensure not behind restrictive firewall
-
----
-
-## Next Steps
-
-1. **Explore the code** - Every line is commented
-2. **Read ARCHITECTURE.md** - Deep dive into design
-3. **Experiment** - Try different prompts
-4. **Compare** - Run both sync and async versions
-5. **Deploy** - See how async version scales
-
----
+- Verify your internet connection.
+- Check that `AZURE_OPENAI_ENDPOINT` is correct.
+- Confirm that your network or firewall allows access to the endpoint.
 
 ## File Structure
 
@@ -180,36 +145,28 @@ pip install -r requirements.txt
 ├── chat-app.py              # Synchronous implementation
 ├── chat-async.py            # Asynchronous implementation
 ├── requirements.txt         # Python dependencies
-├── .env.example            # Configuration template
-├── .gitignore              # Git ignore rules
-├── README.md               # Full documentation
-├── ARCHITECTURE.md         # Design details
-├── CONTRIBUTING.md         # Contribution guidelines
-├── LICENSE                 # MIT License
+├── .env.example             # Configuration template
+├── .gitignore               # Git ignore rules
+├── README.md                # Full documentation
+├── ARCHITECTURE.md          # Design details
+├── CONTRIBUTING.md          # Contribution guidelines
+├── LICENSE                  # MIT License
 └── .github/
     ├── workflows/
-    │   └── lint.yml        # CI/CD pipeline
+    │   └── lint.yml         # CI workflow
     └── PULL_REQUEST_TEMPLATE.md
 ```
 
----
+## Next Steps
 
-## Documentation
-
-- **README.md** - Comprehensive guide
-- **ARCHITECTURE.md** - Technical deep dive
-- **Code comments** - Every function explained
-- **In-code docstrings** - Function documentation
-
----
+1. Explore the code.
+2. Read `ARCHITECTURE.md`.
+3. Try different prompts.
+4. Compare the sync and async implementations.
+5. Adapt the async version for a web API or service.
 
 ## Support
 
-- 📧 **Contact:** [contact@samabrains.com](mailto:contact@samabrains.com)
-- 🌐 **Website:** [samabrains.com](https://samabrains.com)
-- 📚 **Docs:** See README.md and ARCHITECTURE.md
-
----
-
-**Ready to build AI applications? Let's go!** 🚀
-"
+- Contact: [contact@samabrains.com](mailto:contact@samabrains.com)
+- Website: [samabrains.com](https://samabrains.com)
+- Docs: See `README.md` and `ARCHITECTURE.md`

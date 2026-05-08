@@ -1,108 +1,101 @@
-
 # Architecture Overview
 
----
+This project demonstrates two small Azure OpenAI chat clients that share the
+same behavior but use different execution models.
 
 ## Synchronous Chat Application (`chat-app.py`)
 
 ```text
 User Input
-    ↓
-Azure OpenAI Client
-    ↓
+    |
+OpenAI Client
+    |
 Responses API Request
-    ↓
-Azure OpenAI Model (GPT-4.1)
-    ↓
+    |
+Azure OpenAI Model
+    |
 Streaming Response Events
-    ├─ response.output_text.delta → Display chunks
-    └─ response.completed → Save response ID
-    ↓
-User Display + Context Storage
+    |-- response.output_text.delta -> Display text chunk
+    `-- response.completed -> Save response ID
+    |
+Next Turn Uses previous_response_id
 ```
 
-**Key Flow:**
+### Flow
 
-1. User enters prompt
-2. Client sends synchronous request
-3. Model processes and streams response
-4. Each chunk displays immediately
-5. Response ID saved for context linking
+1. The user enters a prompt.
+2. The client sends a synchronous Responses API request.
+3. The model streams text events back to the terminal.
+4. The app prints each text delta immediately.
+5. The app stores the completed response ID for the next turn.
 
-**Advantages:**
+### Advantages
 
-- Simpler control flow
-- Easier to debug
-- Straightforward error handling
+- Simple control flow.
+- Easy to debug.
+- Useful for demos, learning, and scripts.
 
-**Limitations:**
+### Limitations
 
-- Blocks execution while waiting
-- Can't handle concurrent requests
-- Not suitable for high-concurrency scenarios
-
----
+- Blocks while waiting for model events.
+- Does not handle multiple conversations at once.
+- Is less suitable for high-concurrency services.
 
 ## Asynchronous Chat Application (`chat-async.py`)
 
 ```text
 User Input
-    ↓
+    |
 Async Event Loop
-    ↓
+    |
 AsyncOpenAI Client
-    ↓
+    |
 Async Responses API Request
-    ↓
-Azure OpenAI Model (GPT-4.1)
-    ↓
-Awaitable Response
-    ├─ Non-blocking wait
-    └─ Event loop can handle other tasks
-    ↓
-Response Processing + Context Storage
+    |
+Azure OpenAI Model
+    |
+Async Streaming Events
+    |-- response.output_text.delta -> Display text chunk
+    `-- response.completed -> Save response ID
+    |
+Next Turn Uses previous_response_id
 ```
 
-**Key Flow:**
+### Flow
 
-1. User enters prompt
-2. Event loop executes async request
-3. `await` pauses execution without blocking
-4. Other tasks can execute simultaneously
-5. Response ID saved when complete
+1. The user enters a prompt.
+2. The event loop awaits an async Responses API request.
+3. The model streams events back through an async iterator.
+4. The app prints each text delta immediately.
+5. The app stores the completed response ID for the next turn.
 
-**Advantages:**
+### Advantages
 
-- Non-blocking architecture
-- Handles concurrent operations
-- Better resource utilization
-- Production-ready for APIs
+- Non-blocking I/O model.
+- Fits naturally into async Python services.
+- Better foundation for concurrent chat sessions.
 
-**Use Cases:**
+### Use Cases
 
-- Web APIs (FastAPI, Flask-Async)
-- High-concurrency services
-- Event-driven applications
-- Server handling multiple clients
+- FastAPI or Starlette applications.
+- WebSocket chat servers.
+- Event-driven services.
+- API servers handling many clients.
 
----
+## Responses API vs Chat Completions
 
-## Responses API vs ChatCompletions
-
-| Feature               | ChatCompletions      | Responses API                |
-|----------------------|---------------------|------------------------------|
-| Message Format       | Array of messages   | Direct instructions          |
-| Conversation Tracking| Manual management   | Built-in (response IDs)      |
-| Streaming            | Yes                | Yes                         |
-| Tool Support         | Via function_calling| Native (in tools-augmented)  |
-| Syntax               | Verbose            | Simple                      |
-| Learning Curve       | Steeper            | Gentler                     |
-
----
+| Feature | Chat Completions | Responses API |
+| --- | --- | --- |
+| Message format | Array of messages | Direct input and instructions |
+| Conversation tracking | Manual history management | Response ID linking |
+| Streaming | Supported | Supported |
+| Tool support | Function calling | Native tool support |
+| Syntax | More verbose | More direct |
+| Learning curve | Steeper | Gentler |
 
 ## Conversation Context Management
 
-**How Response IDs Work:**
+The scripts use response IDs instead of storing a local message history.
 
 ```text
 Exchange 1:
@@ -111,84 +104,67 @@ Exchange 1:
 
 Exchange 2:
   User: "How does it compare to modern LLMs?"
-  previous_response_id: abc123 ← Links back
+  previous_response_id: abc123
 
-  Model receives:
-  1. User's current question
-  2. Previous response context (from ID)
-  3. Can understand "it" refers to ELIZA
+The model can use the previous response context and understand that "it" refers to ELIZA.
 ```
 
-**Benefits:**
+### Benefits
 
-- Automatic context management
-- No need to store message history
-- Efficient token usage
-- Clean API design
-
----
+- Less local state to manage.
+- Cleaner prompt construction.
+- Efficient context linking through the API.
 
 ## Technology Stack
 
 - **Language:** Python 3.13+
-- **SDK:** OpenAI Python SDK v2.33+
-- **Authentication:** Azure Identity (token-based)
-- **Model:** Azure OpenAI GPT-4.1
+- **SDK:** OpenAI Python SDK
+- **Authentication:** Azure Identity
+- **Model:** Azure OpenAI model deployment
 - **Infrastructure:** Microsoft Foundry / Azure OpenAI Service
-- **Concurrency:** asyncio (Python standard library)
+- **Concurrency:** `asyncio` for the async implementation
 
----
+## Error Handling and Resilience
 
-## Error Handling & Resilience
+Implemented:
 
-**Implemented:**
+- Azure credential authentication with `DefaultAzureCredential`.
+- Environment variable validation.
+- Graceful terminal error output.
+- Credential cleanup in `finally` blocks.
 
-- Credential authentication with DefaultAzureCredential
-- Graceful error reporting
-- Resource cleanup in finally blocks
-- Input validation
+Recommended for production:
 
-**For Production:**
-
-- Retry logic with exponential backoff
-- Rate limiting handling
-- Comprehensive logging
-- Health checks
-- Circuit breakers
-
----
+- Retry logic with exponential backoff.
+- Rate limit handling.
+- Structured logging.
+- Health checks.
+- Centralized configuration management.
 
 ## Deployment Considerations
 
-**Synchronous (`chat-app.py`):**
+### Synchronous App
 
-- Simple standalone scripts
-- Scheduled jobs
-- Sequential processing
-- Learning/demo purposes
+- Good for standalone scripts.
+- Good for learning and demos.
+- Best when only one request is handled at a time.
 
-**Asynchronous (`chat-async.py`):**
+### Asynchronous App
 
-- FastAPI/Starlette applications
-- gRPC services
-- WebSocket servers
-- High-throughput APIs
-- Cloud-native deployments
-
----
+- Better for web APIs and services.
+- Easier to adapt for concurrent sessions.
+- Better fit for cloud-native Python applications.
 
 ## Performance Characteristics
 
-**Streaming Benefits:**
+### Streaming Benefits
 
-- Time-to-first-token: Minimal latency
-- User perception: Responsive interface
-- Memory efficiency: Process chunks vs entire response
-- Network optimization: Progressive delivery
+- Lower time to first visible text.
+- More responsive user experience.
+- Processes chunks as they arrive.
 
-**Async Benefits:**
+### Async Benefits
 
-- Throughput: Handle 100s of concurrent requests
-- Latency: Non-blocking during I/O
-- Resource usage: Minimal thread overhead
-- Scalability: Efficient resource pooling
+- Avoids blocking during network I/O.
+- Allows other async work to run while waiting.
+- Scales better in services that manage many connections.

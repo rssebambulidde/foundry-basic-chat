@@ -1,147 +1,188 @@
 # Azure AI Chat Applications
 
-**SamaBrains Solution** | AI Engineering Project  
-*Building intelligent conversational AI with Microsoft Foundry and Azure OpenAI*
+**SamaBrains Solution** | AI Engineering Project
 
----
+Build simple conversational AI clients with Microsoft Foundry, Azure OpenAI,
+the Responses API, streaming responses, and response ID based conversation
+tracking.
 
-## 📋 Project Overview
+## Project Overview
 
-Demonstration of modern AI chat architectures using **Responses API**, **streaming responses**, and **conversation tracking**. Two implementations showcase different concurrency patterns:
+This repository contains two command-line chat implementations that demonstrate different Python concurrency patterns.
 
-### **chat-app.py** - Synchronous Chat Application
-- **Synchronous architecture** - Sequential request/response flow
-- **Streaming responses** - Real-time token-by-token display
-- **Conversation tracking** - Response IDs for context management
-- **Use case:** Sequential chatbots, simple deployments, learning applications
+### `chat-app.py`: Synchronous Chat Application
 
-### **chat-async.py** - Asynchronous Chat Application  
-- **Asynchronous architecture** - Non-blocking async/await patterns
-- **Concurrent handling** - Multiple conversations simultaneously
-- **Same features** - Streaming, context tracking, response management
-- **Use case:** Web services, API servers, production deployments, high-concurrency scenarios
+- Uses a sequential request and response flow.
+- Streams response text chunk by chunk.
+- Tracks context with `previous_response_id`.
+- Best for learning, demos, scripts, and simple chatbots.
+
+### `chat-async.py`: Asynchronous Chat Application
+
+- Uses `asyncio` and `AsyncOpenAI`.
+- Streams response text with `async for`.
+- Tracks context with `previous_response_id`.
+- Best for web services, API servers, and high-concurrency applications.
 
 ## Quick Start
 
-### 1. Setup
+### 1. Set Up Python
+
 ```bash
-# Create virtual environment
 python -m venv venv
 venv\Scripts\activate
-
-# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Configure
+On macOS/Linux, activate the environment with:
+
 ```bash
-# Copy the template
+source venv/bin/activate
+```
+
+### 2. Configure Azure OpenAI
+
+```bash
 copy .env.example .env
-
-# Edit .env and add your actual values:
-# - AZURE_OPENAI_ENDPOINT: Your Azure OpenAI service endpoint
-# - MODEL_DEPLOYMENT: Your model name (e.g., gpt-4.1)
 ```
 
-### 3. Run
+On macOS/Linux:
 
-**Synchronous Version:**
 ```bash
+cp .env.example .env
+```
+
+Edit `.env` and set:
+
+```env
+AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/openai/v1
+MODEL_DEPLOYMENT=gpt-4.1
+```
+
+### 3. Run a Chat App
+
+```bash
+# Synchronous version
 python chat-app.py
-```
 
-**Asynchronous Version:**
-```bash
+# Asynchronous version
 python chat-async.py
 ```
 
-Then type your prompts. Type `quit` to exit.
+Type your prompts in the terminal. Type `quit` to exit.
 
 ## Key Features
 
-✅ **Responses API** - Modern, simple API (better than ChatCompletions)  
-✅ **Streaming** - See responses appear in real-time  
-✅ **Conversation Memory** - AI remembers previous exchanges  
-✅ **Token-based Auth** - Secure (no hardcoded API keys)  
-✅ **Error Handling** - Graceful error messages  
+- Responses API for simple model calls.
+- Streaming output for responsive terminal chats.
+- Conversation memory through response IDs.
+- Token-based Azure authentication with `DefaultAzureCredential`.
+- Basic configuration validation and graceful error output.
 
 ## Example Conversation
 
-```
+```text
 Enter a prompt: Tell me about the ELIZA chatbot
 Assistant: ELIZA is one of the earliest examples of natural language processing...
 
 Enter a prompt: How does it compare to modern LLMs?
 Assistant: Unlike ELIZA, modern LLMs like GPT-4 use deep learning...
-          (Note: AI remembered ELIZA from previous response!)
 ```
+
+The second prompt can refer to "it" because the app links turns with `previous_response_id`.
 
 ## Architecture
 
-```
+```text
 User Input
-    ↓
+    |
 Responses API Request
-    ↓
-Azure OpenAI Model (GPT-4.1)
-    ↓
-Streaming Response (chunks arrive)
-    ↓
-Display to User + Save Response ID
-    ↓
-Next turn links via previous_response_id
+    |
+Azure OpenAI Model
+    |
+Streaming Response Events
+    |
+Display Text + Save Response ID
+    |
+Next Turn Uses previous_response_id
 ```
 
 ## Requirements
 
-- Python 3.13+
-- Azure Subscription
-- Azure OpenAI Service with deployed model
-- microsoft-foundry access
-- Packages: openai, azure-identity, python-dotenv, aiohttp
+- Python 3.13 or later
+- Azure subscription
+- Azure OpenAI resource with a deployed model
+- Microsoft Foundry or Azure OpenAI access
+- Python packages from `requirements.txt`
 
-## For Learning
+## Repository Details
 
-**New to AI/Coding?** Check the comments in the code - every line is explained!
+| Detail | Value |
+| --- | --- |
+| Repository | `rssebambulidde/foundry-basic-chat` |
+| Remote URL | `https://github.com/rssebambulidde/foundry-basic-chat.git` |
+| Current branch | `master` |
+| Project type | Python command-line AI chat demo |
+| Runtime | Python 3.13+ |
+| Authentication | Azure Identity token authentication |
+| Primary API | OpenAI Responses API through Azure OpenAI |
+| License | MIT |
+| CI workflow | GitHub Actions lint and formatting checks |
 
-**Want to understand?**
-- `chat-app.py` - Simpler, synchronous flow (easier to follow)
-- `chat-async.py` - More advanced, async patterns (requires async knowledge)
+## Project Files
 
-## Comparison with Tools-Enhanced Version
+| File | Purpose |
+| --- | --- |
+| `chat-app.py` | Synchronous streaming chat client |
+| `chat-async.py` | Asynchronous streaming chat client |
+| `.env.example` | Environment variable template |
+| `requirements.txt` | Runtime Python dependencies |
+| `QUICKSTART.md` | Step-by-step setup guide |
+| `ARCHITECTURE.md` | Design and flow details |
+| `CONTRIBUTING.md` | Contribution guidelines |
+
+## Comparison With Tools-Enhanced Chat
 
 | Feature | This Project | Tools-Enhanced |
-|---------|------------|-----------------|
-| Chat Functionality | ✅ | ✅ |
-| Streaming | ✅ | ✅ |
-| Conversation Memory | ✅ | ✅ |
-| Non-blocking (async) | Only in chat-async.py | Not available |
-| File Search (PDFs) | ❌ | ✅ |
-| Web Search | ❌ | ✅ |
-| Use Case | General Q&A | Knowledge-augmented AI |
+| --- | --- | --- |
+| Chat functionality | Yes | Yes |
+| Streaming | Yes | Yes |
+| Conversation memory | Yes | Yes |
+| Async implementation | Yes | No |
+| File search | No | Yes |
+| Web search | No | Yes |
+| Primary use case | General Q&A | Knowledge-augmented AI |
 
 ## Troubleshooting
 
-**"Azure credentials not found"**
-- Run `az login` to authenticate with Azure
+### Azure Credentials Not Found
 
-**"Model not found"**
-- Check MODEL_DEPLOYMENT in .env matches your actual deployment
+Run:
 
-**"Connection timeout"**
-- Verify AZURE_OPENAI_ENDPOINT is correct
-- Check internet connection
+```bash
+az login
+```
+
+### Model Not Found
+
+Check that `MODEL_DEPLOYMENT` in `.env` exactly matches your Azure OpenAI deployment name.
+
+### Connection Timeout
+
+- Verify that `AZURE_OPENAI_ENDPOINT` is correct.
+- Check your internet connection.
+- Confirm that your network allows access to the Azure OpenAI endpoint.
 
 ## Next Steps
 
-- Try different system prompts to customize the AI's personality
-- Experiment with multi-turn conversations
-- Compare sync vs async performance
-- Explore the tools-enhanced version for advanced capabilities
+- Try different system instructions in the scripts.
+- Experiment with multi-turn conversations.
+- Compare sync and async behavior.
+- Use the async version as a starting point for a web API.
 
 ## Resources
 
-- [OpenAI Python SDK Docs](https://github.com/openai/openai-python)
+- [OpenAI Python SDK](https://github.com/openai/openai-python)
 - [Azure OpenAI Service](https://learn.microsoft.com/en-us/azure/ai-services/openai/)
-- [Microsoft Foundry Docs](https://microsoft.com/foundry)
+- [Microsoft Foundry](https://microsoft.com/foundry)
 - [Async/Await in Python](https://docs.python.org/3/library/asyncio.html)
