@@ -10,6 +10,17 @@ tracking.
 
 This repository contains two command-line chat implementations that demonstrate different Python concurrency patterns.
 
+## Why I Built This
+
+I built this project to practice and demonstrate how modern AI chat applications
+can be implemented with Azure OpenAI, Microsoft Foundry, and the Responses API.
+The goal was to go beyond a simple prompt-and-response script by showing
+streaming output, response ID based conversation memory, token-based Azure
+authentication, and both synchronous and asynchronous Python client patterns.
+
+This project also reflects my focus on building AI applications that are clear,
+documented, and easy for other developers to run, study, and extend.
+
 ### `chat-app.py`: Synchronous Chat Application
 
 - Uses a sequential request and response flow.
